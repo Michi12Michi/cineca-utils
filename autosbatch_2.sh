@@ -169,11 +169,11 @@ for dir in */; do
 	#cd /neutral
 	#sbatch neutral/"job-${root_name}_neutral"
 	#cd ..
-	cd /cation
-	sbatch cation/"job-${new_file_name}_cation" 
+	cd cation
+	sbatch "job-${new_file_name}_cation" 
 	cd ..
 	cd anion
-	sbatch anion/"job-${new_file_name}_anion"
+	sbatch "job-${new_file_name}_anion"
 	cd ..
 
 	echo -e "\e[32mOperation completed in ${dir}.\e[0m"; echo
