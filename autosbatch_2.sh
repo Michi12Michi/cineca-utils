@@ -61,7 +61,7 @@ for dir in */; do
 		continue
 	fi
 	
-	atoms_number=$(head -n 1 $xyz_files_list)
+	atoms_number=$(head -n 1 $xyz_files_list | xargs)
 
 	if [[ "$atoms_number" =~ ^[0-9]+$ ]]; then
 		:
@@ -71,7 +71,7 @@ for dir in */; do
 		continue
 	fi
 
-	no_lines_to_copy=$((atoms_number+3))
+	no_lines_to_copy=$((atoms_number+2))
 	
 	if [ $lines_in_file -lt $atoms_number ]; then
 		echo "Syntax error in ${xyz_file}. Aborting processing of ${dir}."
@@ -157,19 +157,25 @@ for dir in */; do
 	sed -i "s|${XYZ_PLACEHOLDER}|${new_file_name}_cation.xyz|g" cation/"${new_file_name}_cation.inp"
 	sed -i "s|${PROJECT_PLACEHOLDER}|${new_file_name}_cation|g" cation/"${new_file_name}_cation.inp"
 	sed -i "s|${RESTART_PLACEHOLDER}||g" cation/"${new_file_name}_cation.inp"
+	sed -i "s|${MO_CUBES_PLACEHOLDER}||g" cation/"${new_file_name}_cation.inp"
 	sed -i "s|${JOB_INP_PLACEHOLDER}|${new_file_name}_anion.inp|g" anion/"job-${new_file_name}_anion"
 	sed -i "s|${JOB_OUT_PLACEHOLDER}|${new_file_name}_anion.out|g" anion/"job-${new_file_name}_anion"
 	sed -i "s|${CHARGE_PLACEHOLDER}|CHARGE -1|g" anion/"${new_file_name}_anion.inp"
 	sed -i "s|${XYZ_PLACEHOLDER}|${new_file_name}_anion.xyz|g" anion/"${new_file_name}_anion.inp"
 	sed -i "s|${PROJECT_PLACEHOLDER}|${new_file_name}_anion|g" anion/"${new_file_name}_anion.inp"
 	sed -i "s|${RESTART_PLACEHOLDER}||g" anion/"${new_file_name}_anion.inp"
-	# sbatch neutral/"job-${root_name}_neutral" && sbatch cation/"job-${new_file_name}_cation" && sbatch anion/"job-${new_file_name}_anion"
+	sed -i "s|${MO_CUBES_PLACEHOLDER}||g" anion/"${new_file_name}_anion.inp"
+
+	#cd /neutral
+	#sbatch neutral/"job-${root_name}_neutral"
+	#cd ..
+	cd /cation
+	sbatch cation/"job-${new_file_name}_cation" 
+	cd ..
+	cd anion
+	sbatch anion/"job-${new_file_name}_anion"
+	cd ..
 
 	echo -e "\e[32mOperation completed in ${dir}.\e[0m"; echo
 	cd .. || exit 1
 done
-
-
-
-
-#echo -e \e[31m  32 e 33 sono rosso verde e giallo   \e[0m
